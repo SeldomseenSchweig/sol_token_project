@@ -26,6 +26,7 @@ function MintToken() {
   let fromTokenAccount: Account;
 
   async function createToken() {
+    pubkey(fromWallet);
     const fromAirdropSignature = await connection.requestAirdrop(
       fromWallet.publicKey,
       LAMPORTS_PER_SOL
@@ -51,11 +52,14 @@ function MintToken() {
     );
     console.log(`create token account: ${fromTokenAccount.address.toBase58()}`);
   }
+  function pubkey(fromWallet: Keypair) {
+    console.log(fromWallet.publicKey);
+  }
   return (
     <div>
       Mint Token Section
       <div>
-        <button>Create Token</button>
+        <button onClick={createToken}>Create Token</button>
         <button>Mint Token</button>
         <button>Check Balance</button>
         <button>Send Token</button>
