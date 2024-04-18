@@ -24,45 +24,101 @@ function MintToken() {
   const fromWallet = Keypair.generate();
   let mint: PublicKey;
   let fromTokenAccount: Account;
+  const toWallet = new PublicKey(
+    "Cx22XfUoXsn3X3A5sJbAiNAQnJG455rA8gRDrGkJ6MUG"
+  );
 
   async function createToken() {
-    pubkey(fromWallet);
-    const fromAirdropSignature = await connection.requestAirdrop(
-      fromWallet.publicKey,
-      LAMPORTS_PER_SOL
-    );
-    await connection.confirmTransaction(fromAirdropSignature);
+    // pubkey(fromWallet);
+    try {
+      const fromAirdropSignature = await connection.requestAirdrop(
+        fromWallet.publicKey,
+        LAMPORTS_PER_SOL
+      );
+      await connection.confirmTransaction(fromAirdropSignature);
+    } catch (error) {
+      console.log("somtething went wron with create token");
+      alert(error);
+    }
 
     // create new token mint
+    try {
+      mint = await createMint(
+        connection,
+        fromWallet,
+        fromWallet.publicKey,
+        null,
+        9
+      );
+      console.log(`create token: ${mint.toBase58()} `);
 
-    mint = await createMint(
+      fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+        connection,
+        fromWallet,
+        mint,
+        fromWallet.publicKey
+      );
+      console.log(
+        `create token account: ${fromTokenAccount.address.toBase58()}`
+      );
+    } catch (error) {
+      console.log("something went wrong with create mint");
+    }
+  }
+  async function mintToken() {
+    try {
+      const signature = await mintTo(
+        connection,
+        fromWallet,
+        mint,
+        fromTokenAccount.address,
+        fromWallet.publicKey,
+        10000000000
+      );
+      console.log(`Mint signature: ${signature}`);
+    } catch (error) {
+      console.log("something went wrong minting token");
+    }
+  }
+
+  async function checkBalance() {
+    const mintInfo = await getMint(connection, mint);
+    console.log(mintInfo.supply);
+
+    const tokenAccountInfo = await getAccount(
       connection,
-      fromWallet,
-      fromWallet.publicKey,
-      null,
-      9
+      fromTokenAccount.address
     );
-    console.log(`create token: ${mint.toBase58()} `);
+    console.log(tokenAccountInfo.amount);
+  }
 
-    fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+  async function sendToken(params: type) {
+    const toTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       fromWallet,
       mint,
-      fromWallet.publicKey
+      toWallet
     );
-    console.log(`create token account: ${fromTokenAccount.address.toBase58()}`);
-  }
-  function pubkey(fromWallet: Keypair) {
-    console.log(fromWallet.publicKey);
+    console.log(`To Account ${toTokenAccount.address}`);
+
+    const signature = await transfer(
+      connection,
+      fromWallet,
+      fromTokenAccount.address,
+      toTokenAccount.address,
+      fromWallet.publicKey,
+      1000000000
+    );
+    console.log(`finished transfer to ${signature}`);
   }
   return (
     <div>
       Mint Token Section
       <div>
         <button onClick={createToken}>Create Token</button>
-        <button>Mint Token</button>
-        <button>Check Balance</button>
-        <button>Send Token</button>
+        <button onClick={mintToken}>Mint Token</button>
+        <button onClick={checkBalance}>Check Balance</button>
+        <button onClick={sendToken}>Send Token</button>
       </div>
     </div>
   );
