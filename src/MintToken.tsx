@@ -92,7 +92,7 @@ function MintToken() {
     console.log(tokenAccountInfo.amount);
   }
 
-  async function sendToken(params: type) {
+  async function sendToken() {
     const toTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       fromWallet,
