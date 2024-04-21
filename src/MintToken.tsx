@@ -36,9 +36,8 @@ function MintToken() {
         LAMPORTS_PER_SOL
       );
       await connection.confirmTransaction(fromAirdropSignature);
-    } catch (error) {
-      console.log("somtething went wron with create token");
-      alert(error);
+    } catch (error: any) {
+      console.log(`Something went wrong with create token: ${error.message}`);
     }
 
     // create new token mint
@@ -61,8 +60,8 @@ function MintToken() {
       console.log(
         `create token account: ${fromTokenAccount.address.toBase58()}`
       );
-    } catch (error) {
-      console.log("something went wrong with create mint");
+    } catch (error: any) {
+      console.log("something went wrong with create mint" + error.message);
     }
   }
   async function mintToken() {
@@ -76,41 +75,49 @@ function MintToken() {
         10000000000
       );
       console.log(`Mint signature: ${signature}`);
-    } catch (error) {
-      console.log("something went wrong minting token");
+    } catch (error: any) {
+      console.log("something went wrong minting token" + error.message);
     }
   }
 
   async function checkBalance() {
-    const mintInfo = await getMint(connection, mint);
-    console.log(mintInfo.supply);
+    try {
+      const mintInfo = await getMint(connection, mint);
+      console.log(mintInfo.supply);
 
-    const tokenAccountInfo = await getAccount(
-      connection,
-      fromTokenAccount.address
-    );
-    console.log(tokenAccountInfo.amount);
+      const tokenAccountInfo = await getAccount(
+        connection,
+        fromTokenAccount.address
+      );
+      console.log(tokenAccountInfo.amount);
+    } catch (error: any) {
+      console.log(`error checking balance: ${error.message}`);
+    }
   }
 
   async function sendToken() {
-    const toTokenAccount = await getOrCreateAssociatedTokenAccount(
-      connection,
-      fromWallet,
-      mint,
-      toWallet
-    );
-    console.log(`To Account ${toTokenAccount.address}`);
-
-    const signature = await transfer(
-      connection,
-      fromWallet,
-      fromTokenAccount.address,
-      toTokenAccount.address,
-      fromWallet.publicKey,
-      1000000000
-    );
-    console.log(`finished transfer to ${signature}`);
+    try {
+      const toTokenAccount = await getOrCreateAssociatedTokenAccount(
+        connection,
+        fromWallet,
+        mint,
+        toWallet
+      );
+      console.log(`To Account ${toTokenAccount.address}`);
+      const signature = await transfer(
+        connection,
+        fromWallet,
+        fromTokenAccount.address,
+        toTokenAccount.address,
+        fromWallet.publicKey,
+        1000000000
+      );
+      console.log(`finished transfer to ${signature}`);
+    } catch (error) {
+      console.log(error);
+    }
   }
+
   return (
     <div>
       Mint Token Section
