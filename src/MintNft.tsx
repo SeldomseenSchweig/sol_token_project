@@ -72,26 +72,32 @@ function MintNft() {
       );
       console.log(`Mint signature: ${signature}`);
     } catch (error: any) {
-      console.log("something went wrong minting token" + error.message);
+      console.log("something went wrong minting token" + error);
     }
   }
 
   async function lockNft() {
-    let transaction = new Transaction().add(
-      createSetAuthorityInstruction(
-        mint,
-        fromWallet.publicKey,
-        AuthorityType.MintTokens,
-        null
-      )
-    );
+    try {
+      let transaction = new Transaction().add(
+        createSetAuthorityInstruction(
+          mint,
+          fromWallet.publicKey,
+          AuthorityType.MintTokens,
+          null
+        )
+      );
 
-    // send transaction
+      // send transaction
 
-    const signature = await sendAndConfirmTransaction(connection, transaction, [
-      fromWallet,
-    ]);
-    console.log("lock signature", signature);
+      const signature = await sendAndConfirmTransaction(
+        connection,
+        transaction,
+        [fromWallet]
+      );
+      console.log("lock signature", signature);
+    } catch (error: any) {
+      console.log(`There was an error in lockNFT: ${error.message}`);
+    }
   }
 
   return (

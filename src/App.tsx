@@ -8,6 +8,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <MintToken />
+        <br />
         <MintNft />
       </header>
     </div>
