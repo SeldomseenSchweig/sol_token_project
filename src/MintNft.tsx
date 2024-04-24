@@ -124,8 +124,7 @@ function MintNft() {
       <div>
         <button onClick={createToken}>Create NFT</button>
         <button onClick={mintToken}>Mint NFT</button>
-        <button onClick={checkBalance}>Check Balance</button>
-        <button onClick={sendToken}>Send NFT</button>
+        <button onClick={checkBalance}>Lock NFT</button>
       </div>
     </div>
   );
