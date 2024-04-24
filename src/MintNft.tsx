@@ -1,20 +1,21 @@
 import React from "react";
 import "./App.css";
 import {
-  clusterApiUrl,
   Connection,
   PublicKey,
   Keypair,
+  Transaction,
   LAMPORTS_PER_SOL,
+  sendAndConfirmTransaction,
+  clusterApiUrl,
 } from "@solana/web3.js";
 import {
   createMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
-  transfer,
   Account,
-  getMint,
-  getAccount,
+  createSetAuthorityInstruction,
+  AuthorityType,
 } from "@solana/spl-token";
 
 window.Buffer = window.Buffer || require("buffer").Buffer;
@@ -24,11 +25,8 @@ function MintNft() {
   const fromWallet = Keypair.generate();
   let mint: PublicKey;
   let fromTokenAccount: Account;
-  const toWallet = new PublicKey(
-    "Cx22XfUoXsn3X3A5sJbAiNAQnJG455rA8gRDrGkJ6MUG"
-  );
 
-  async function createToken() {
+  async function createNFT() {
     // pubkey(fromWallet);
     try {
       const fromAirdropSignature = await connection.requestAirdrop(
@@ -47,9 +45,9 @@ function MintNft() {
         fromWallet,
         fromWallet.publicKey,
         null,
-        9
+        0 // only allow whole token
       );
-      console.log(`create token: ${mint.toBase58()} `);
+      console.log(`create NFT: ${mint.toBase58()} `);
 
       fromTokenAccount = await getOrCreateAssociatedTokenAccount(
         connection,
@@ -57,14 +55,12 @@ function MintNft() {
         mint,
         fromWallet.publicKey
       );
-      console.log(
-        `create token account: ${fromTokenAccount.address.toBase58()}`
-      );
+      console.log(`create NFT account: ${fromTokenAccount.address.toBase58()}`);
     } catch (error: any) {
       console.log("something went wrong with create mint" + error.message);
     }
   }
-  async function mintToken() {
+  async function mintNft() {
     try {
       const signature = await mintTo(
         connection,
@@ -72,7 +68,7 @@ function MintNft() {
         mint,
         fromTokenAccount.address,
         fromWallet.publicKey,
-        10000000000
+        1 // there can only be one nft
       );
       console.log(`Mint signature: ${signature}`);
     } catch (error: any) {
@@ -80,51 +76,31 @@ function MintNft() {
     }
   }
 
-  async function checkBalance() {
-    try {
-      const mintInfo = await getMint(connection, mint);
-      console.log(mintInfo.supply);
-
-      const tokenAccountInfo = await getAccount(
-        connection,
-        fromTokenAccount.address
-      );
-      console.log(tokenAccountInfo.amount);
-    } catch (error: any) {
-      console.log(`error checking balance: ${error.message}`);
-    }
-  }
-
-  async function sendToken() {
-    try {
-      const toTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        fromWallet,
+  async function lockNft() {
+    let transaction = new Transaction().add(
+      createSetAuthorityInstruction(
         mint,
-        toWallet
-      );
-      console.log(`To Account ${toTokenAccount.address}`);
-      const signature = await transfer(
-        connection,
-        fromWallet,
-        fromTokenAccount.address,
-        toTokenAccount.address,
         fromWallet.publicKey,
-        1000000000
-      );
-      console.log(`finished transfer to ${signature}`);
-    } catch (error) {
-      console.log(error);
-    }
+        AuthorityType.MintTokens,
+        null
+      )
+    );
+
+    // send transaction
+
+    const signature = await sendAndConfirmTransaction(connection, transaction, [
+      fromWallet,
+    ]);
+    console.log("lock signature", signature);
   }
 
   return (
     <div>
       Mint NFT Section
       <div>
-        <button onClick={createToken}>Create NFT</button>
-        <button onClick={mintToken}>Mint NFT</button>
-        <button onClick={checkBalance}>Lock NFT</button>
+        <button onClick={createNFT}>Create NFT</button>
+        <button onClick={mintNft}>Mint NFT</button>
+        <button onClick={lockNft}>Lock NFT</button>
       </div>
     </div>
   );
