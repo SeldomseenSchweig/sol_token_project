@@ -2,6 +2,7 @@ import React from "react";
 import MintToken from "./MintToken";
 import "./App.css";
 import MintNft from "./MintNft";
+import SendSol from "./SendSol";
 
 function App() {
   return (
@@ -10,6 +11,8 @@ function App() {
         <MintToken />
         <br />
         <MintNft />
+        <br />
+        <SendSol />
       </header>
     </div>
   );
