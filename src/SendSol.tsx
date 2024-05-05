@@ -34,6 +34,7 @@ function SendSol() {
   let mint: PublicKey;
   let fromTokenAccount: Account;
   let associatedTokenAccount: PublicKey;
+
   async function wrapSol() {
     try {
       const airdropSignature = await connection.requestAirdrop(
