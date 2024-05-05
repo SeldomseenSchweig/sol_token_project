@@ -83,8 +83,8 @@ function SendSol() {
       Send Sol Section
       <div>
         <button onClick={wrapSol}>Wrap SOL</button>
-        {/* <button onClick={unwrapSol}>Unwrap SOL</button> */}
-        {/* <button onClick={sendSol}>Send SOL</button> */}
+        {<button /* onClick={unwrapSol} */>Unwrap SOL</button>}
+        {<button /* onClick={sendSol} */>Send SOL</button>}
       </div>
     </div>
   );
