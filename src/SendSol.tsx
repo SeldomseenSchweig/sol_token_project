@@ -8,6 +8,8 @@ import {
   LAMPORTS_PER_SOL,
   sendAndConfirmTransaction,
   clusterApiUrl,
+  sendAndConfirmRawTransaction,
+  SystemProgram,
 } from "@solana/web3.js";
 import {
   createMint,
@@ -19,7 +21,10 @@ import {
   getAssociatedTokenAddress,
   NATIVE_MINT,
   createAssociatedTokenAccountInstruction,
+  createSyncNativeInstruction,
+  getAccount,
 } from "@solana/spl-token";
+import { constants } from "buffer";
 
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
@@ -52,6 +57,22 @@ function SendSol() {
           NATIVE_MINT
         )
       );
+      sendAndConfirmTransaction(connection, ataTransaction, [fromWallet]);
+      const solTransferTransaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: fromWallet.publicKey,
+          toPubkey: associatedTokenAccount,
+          lamports: LAMPORTS_PER_SOL, // the sol that we are sending
+        }),
+        createSyncNativeInstruction(associatedTokenAccount)
+      );
+      await sendAndConfirmTransaction(connection, solTransferTransaction, [
+        fromWallet,
+      ]);
+      const accountInfo = await getAccount(connection, associatedTokenAccount);
+      console.log(
+        `Native: ${accountInfo.isNative}, lamports: ${accountInfo.amount}`
+      );
     } catch (error: any) {
       console.log("something wentwrong:", error.message);
     }
@@ -61,8 +82,8 @@ function SendSol() {
       Send Sol Section
       <div>
         <button onClick={wrapSol}>Wrap SOL</button>
-        <button onClick={unwrapSol}>Unwrap SOL</button>
-        <button onClick={sendSol}>Send SOL</button>
+        {/* <button onClick={unwrapSol}>Unwrap SOL</button> */}
+        {/* <button onClick={sendSol}>Send SOL</button> */}
       </div>
     </div>
   );
