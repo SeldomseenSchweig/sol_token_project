@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import {
   clusterApiUrl,
@@ -20,6 +20,8 @@ import {
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
 function MintToken() {
+  const [tokenWalletBalance, setTokenWalletBalance] = useState(BigInt(0));
+
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
   const fromWallet = Keypair.generate();
   let mint: PublicKey;
@@ -83,7 +85,7 @@ function MintToken() {
   async function checkBalance() {
     try {
       const mintInfo = await getMint(connection, mint);
-      console.log(mintInfo.supply);
+      setTokenWalletBalance(mintInfo.supply);
 
       const tokenAccountInfo = await getAccount(
         connection,
@@ -126,6 +128,10 @@ function MintToken() {
         <button onClick={mintToken}>Mint Token</button>
         <button onClick={checkBalance}>Check Balance</button>
         <button onClick={sendToken}>Send Token</button>
+        <h1>
+          Balance:{" "}
+          {tokenWalletBalance !== BigInt(0) ? tokenWalletBalance.toString() : 0}
+        </h1>
       </div>
     </div>
   );

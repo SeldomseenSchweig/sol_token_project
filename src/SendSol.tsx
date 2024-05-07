@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import {
   Connection,
@@ -35,6 +35,7 @@ function SendSol() {
   let fromTokenAccount: Account;
   let associatedTokenAccount: PublicKey;
 
+  const [walletBalance, setWalletBalance] = useState(0);
   async function wrapSol() {
     try {
       const airdropSignature = await connection.requestAirdrop(
@@ -78,13 +79,22 @@ function SendSol() {
       console.log("something wentwrong:", error.message);
     }
   }
+
+  async function unwrapSol() {
+    const walletBalance = await connection.getBalance(fromWallet.publicKey);
+    setWalletBalance(walletBalance);
+    console.log(`Wallet Balancee before unwrap ${walletBalance}`);
+  }
   return (
     <div>
-      Send Sol Section
       <div>
-        <button onClick={wrapSol}>Wrap SOL</button>
-        {<button /* onClick={unwrapSol} */>Unwrap SOL</button>}
-        {<button /* onClick={sendSol} */>Send SOL</button>}
+        Send Sol Section
+        <div>
+          <button onClick={wrapSol}>Wrap SOL</button>
+          {<button /* onClick={unwrapSol} */>Unwrap SOL</button>}
+          {<button /* onClick={sendSol} */>Send SOL</button>}
+        </div>
+        <h1>{walletBalance} </h1>
       </div>
     </div>
   );
