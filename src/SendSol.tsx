@@ -23,6 +23,7 @@ import {
   createAssociatedTokenAccountInstruction,
   createSyncNativeInstruction,
   getAccount,
+  closeAccount,
 } from "@solana/spl-token";
 import { constants } from "buffer";
 
@@ -83,7 +84,17 @@ function SendSol() {
   async function unwrapSol() {
     const walletBalance = await connection.getBalance(fromWallet.publicKey);
     setWalletBalance(walletBalance);
-    console.log(`Wallet Balancee before unwrap ${walletBalance}`);
+    await closeAccount(
+      connection,
+      fromWallet,
+      associatedTokenAccount,
+      fromWallet.publicKey,
+      fromWallet
+    );
+    const walletBalancePostClose = await connection.getBalance(
+      fromWallet.publicKey
+    );
+    console.log(`Balance after closing: ${walletBalancePostClose}`);
   }
   return (
     <div>
